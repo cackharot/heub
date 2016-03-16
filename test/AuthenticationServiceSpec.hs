@@ -3,6 +3,7 @@ module AuthenticationServiceSpec (spec) where
 
 import Test.Hspec
 import Test.QuickCheck
+
 import App.Model
 import Services.AuthenticationService
 
@@ -28,6 +29,11 @@ spec = around withCleanDatabase $ do
       let user = buildUser
           userDocument = ["username" =: username user, "password" =: password user, "email" =: email user] in
         convertUserToDocument user `shouldBe` userDocument
+
+    it "should find user by username" $ do
+        _id <- createUser buildUser
+        user <- findUser "admin"
+        user `shouldBe` Just ["_id" =: _id, "username" =: username buildUser, "password" =: password buildUser, "email" =: email buildUser]
 
 
 buildUser = User 1 "admin" "pass@123" "display admin" "admin@app.com" 19880909 20160313 "admin" 20160316 "admin" True

@@ -5,7 +5,7 @@ module Services.AuthenticationService
 where
 
 import Database.MongoDB    (Database, Action, Document, Document, Value, access,
-                            close, connect, delete, exclude, find,
+                            close, connect, delete, exclude, find, findOne,
                             host, insert, insertMany, master, project, rest,
                             select, sort, (=:))
 import Control.Monad.Trans (liftIO)
@@ -20,6 +20,8 @@ validateUser username password = username == "admin" && password == "pass"
 
 createUser :: User -> IO Value
 createUser user = connectDb $ insert "users" (convertUserToDocument user)
+
+findUser username = connectDb $ findOne $ select ["username" =: username] "users"
 
 convertUserToDocument user = ["username" =: username user, "password" =: password user, "email" =: email user]
 
