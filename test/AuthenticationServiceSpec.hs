@@ -16,9 +16,11 @@ spec :: Spec
 spec = around withCleanDatabase $ do
   describe "Authentication Service tests" $ do
     it "returns True given valid username and password" $ do
-      validateUser "admin" "pass" `shouldBe` True
+      _ <- createUser buildUser
+      (validateUser "admin" "pass@123") >>= (`shouldBe` True)
+
     it "returns False given invalid username and password" $ do
-      validateUser "invalid" "invalid" `shouldBe` False
+      validateUser "invalid" "invalid" >>= (`shouldBe` False)
 
     it "creates new user in database given valid user details" $ do
         _id <- createUser buildUser
