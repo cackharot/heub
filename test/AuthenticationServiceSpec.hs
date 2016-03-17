@@ -19,7 +19,11 @@ spec = around withCleanDatabase $ do
       _ <- createUser buildUser
       (validateUser "admin" "pass@123") >>= (`shouldBe` True)
 
-    it "returns False given invalid username and password" $ do
+    it "returns False given valid username and invalid password" $ do
+      _ <- createUser buildUser
+      (validateUser "admin" "invalid_pass") >>= (`shouldBe` False)
+
+    it "returns False given invalid username" $ do
       validateUser "invalid" "invalid" >>= (`shouldBe` False)
 
     it "creates new user in database given valid user details" $ do

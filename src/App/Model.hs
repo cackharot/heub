@@ -1,13 +1,14 @@
 module App.Model
 where
 
+type TUsername = String
 type TPassword = String
 
 type DateTime = Integer
 
 data User = User {
   id :: Integer
-, username :: String
+, username :: TUsername
 , password :: TPassword
 , displayName :: String
 , email :: String
