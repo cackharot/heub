@@ -33,6 +33,20 @@ createUser user = connectDb $ insert "users" (convertUserToDocument user)
 findUser :: TUsername -> IO (Maybe Document)
 findUser username = connectDb $ findOne $ select ["username" =: username] "users"
 
+searchUsers :: IO [User]
+searchUsers = do
+  users <- connectDb $ rest =<< find (select [] "users")
+  return $ ctu users
+
+convertUserDocumentToUser :: Document -> User
+convertUserDocumentToUser doc = User 1 (B.at "username" doc) (B.at "password" doc) "display admin" (B.at "email" doc) 19880909 20160313 "admin" 20160316 "admin" True
+
+--(B.at "dateOfBirth" doc) (B.at "createdAt" doc) (B.at "createdBy" doc) (B.at "updatedAt" doc) (B.at "updatedBy" doc) (B.at "status" doc)
+
+ctu :: [Document] -> [User]
+ctu [x] = [convertUserDocumentToUser x]
+ctu (x:xs) = (convertUserDocumentToUser x):ctu xs
+
 convertUserToDocument user = ["username" =: username user, "password" =: password user, "email" =: email user]
 
 dbName :: Database

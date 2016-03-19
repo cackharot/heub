@@ -41,6 +41,12 @@ spec = around withCleanDatabase $ do
         user <- findUser "admin"
         user `shouldBe` Just ["_id" =: _id, "username" =: username buildUser, "password" =: password buildUser, "email" =: email buildUser]
 
+    it "should search all users" $ do
+      createUser buildUser
+      users <- searchUsers
+      length users `shouldBe` 1
+      users !! 0 `shouldBe` buildUser
+
 
 buildUser = User 1 "admin" "pass@123" "display admin" "admin@app.com" 19880909 20160313 "admin" 20160316 "admin" True
 

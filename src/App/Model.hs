@@ -1,5 +1,10 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module App.Model
 where
+
+import           Data.Aeson
 
 type TUsername = String
 type TPassword = String
@@ -19,3 +24,7 @@ data User = User {
 , updatedBy :: String
 , status :: Bool
 } deriving (Show, Eq, Read)
+
+
+instance ToJSON User where
+  toJSON (User id username password displayName email dateOfBirth createdAt createdBy updatedBy updatedAt status) = object [ "id" .= id, "username" .= username, "email" .= email ]
