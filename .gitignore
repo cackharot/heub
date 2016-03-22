@@ -19,3 +19,4 @@ cabal.sandbox.config
 log/
 .hpc/
 *.tix
+.vagrant/

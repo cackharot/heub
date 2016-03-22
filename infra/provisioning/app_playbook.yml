@@ -1,0 +1,22 @@
+---
+- hosts: all
+  vars:
+    http_port: 80
+    max_clients: 10000
+  tasks:
+  - name: "install net tools"
+    yum: name=net-tools state=latest
+    sudo: yes
+  - name: "install epel-release"
+    yum: name=epel-release state=latest
+    sudo: yes
+  - name: "install nginx"
+    yum: name=nginx state=latest
+    sudo: yes
+  - name: "ensure ngix is running"
+    service: name=nginx state=started enabled=yes
+    sudo: yes
+  handlers:
+  - name: "restart nginx"
+    service: name=nginx state=restarted
+    sudo: yes
