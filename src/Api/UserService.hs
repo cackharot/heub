@@ -12,6 +12,7 @@ import Data.Aeson
 import Control.Lens
 import Control.Monad.State.Class
 import Control.Monad.Trans (liftIO)
+import Data.Maybe
 
 import App.Model
 import Services.AuthenticationService
@@ -21,7 +22,28 @@ data UserService = UserService
 makeLenses ''UserService
 
 userApiRoutes :: [(B.ByteString, Handler b UserService ())]
-userApiRoutes = [("search", method GET fetchAllUsers)]
+userApiRoutes = [("login", method POST validateUserCredentials)
+                ,("search", method GET fetchAllUsers)]
+
+
+validateUserCredentials :: Handler b UserService ()
+validateUserCredentials = do
+  muser <- getPostParam "username"
+  mpass <- getPostParam "password"
+  modifyResponse $ setResponseCode 200
+  let
+    username = getDefaultString muser
+    password = getDefaultString mpass in
+    do
+      isValid <- liftIO $ validateUser username password
+      if isValid then
+        writeLBS . encode $ username ++ ":" ++ password
+      else
+        writeLBS . encode $ ("Invalid username or password! Given (" ++ username ++ ":" ++ password ++ ")")
+
+getDefaultString :: Maybe B.ByteString -> String
+getDefaultString Nothing = ""
+getDefaultString (Just a)  = B.unpack a
 
 fetchAllUsers :: Handler b UserService ()
 fetchAllUsers = do
