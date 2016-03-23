@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings, ExtendedDefaultRules, ScopedTypeVariables #-}
+
 module AuthenticationServiceSpec (spec) where
 
 import Test.Hspec
@@ -12,19 +13,22 @@ import Database.MongoDB    (Action, Document, Document, Value, Database, dropDat
                             host, insert, insertMany, master, project, rest,
                             select, sort, (=:))
 
+{-# ANN module "HLint: ignore Redundant do" #-}
+{-# ANN module "HLint: ignore Redundant bracket" #-}
+
 spec :: Spec
 spec = around withCleanDatabase $
   describe "Authentication Service tests" $ do
     it "returns True given valid username and password" $ do
       _ <- createUser buildUser
-      validateUser "admin" "pass@123" >>= (`shouldBe` True)
+      (validateUser "admin" "pass@123") >>= (`shouldBe` True)
 
     it "returns False given valid username and invalid password" $ do
       _ <- createUser buildUser
-      validateUser "admin" "invalid_pass" >>= (`shouldBe` False)
+      (validateUser "admin" "invalid_pass") >>= (`shouldBe` False)
 
-    it "returns False given invalid username"
-      validateUser "invalid" "invalid" >>= (`shouldBe` False)
+    it "returns False given invalid username" $ do
+      (validateUser "invalid" "invalid") >>= (`shouldBe` False)
 
     it "creates new user in database given valid user details" $ do
         _id <- createUser buildUser
