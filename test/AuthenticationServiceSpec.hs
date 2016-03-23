@@ -13,17 +13,17 @@ import Database.MongoDB    (Action, Document, Document, Value, Database, dropDat
                             select, sort, (=:))
 
 spec :: Spec
-spec = around withCleanDatabase $ do
+spec = around withCleanDatabase $
   describe "Authentication Service tests" $ do
     it "returns True given valid username and password" $ do
       _ <- createUser buildUser
-      (validateUser "admin" "pass@123") >>= (`shouldBe` True)
+      validateUser "admin" "pass@123" >>= (`shouldBe` True)
 
     it "returns False given valid username and invalid password" $ do
       _ <- createUser buildUser
-      (validateUser "admin" "invalid_pass") >>= (`shouldBe` False)
+      validateUser "admin" "invalid_pass" >>= (`shouldBe` False)
 
-    it "returns False given invalid username" $ do
+    it "returns False given invalid username"
       validateUser "invalid" "invalid" >>= (`shouldBe` False)
 
     it "creates new user in database given valid user details" $ do
@@ -31,7 +31,7 @@ spec = around withCleanDatabase $ do
         actual <- db $ rest =<< find (select [] "users")
         actual `shouldBe` [["_id" =: _id, "username" =: username buildUser, "password" =: password buildUser, "email" =: email buildUser]]
 
-    it "returns monogodb document given User data type" $ do
+    it "returns monogodb document given User data type" $
       let user = buildUser
           userDocument = ["username" =: username user, "password" =: password user, "email" =: email user] in
         convertUserToDocument user `shouldBe` userDocument
@@ -45,7 +45,7 @@ spec = around withCleanDatabase $ do
       createUser buildUser
       users <- searchUsers
       length users `shouldBe` 1
-      users !! 0 `shouldBe` buildUser
+      head users `shouldBe` buildUser
 
 
 buildUser = User 1 "admin" "pass@123" "display admin" "admin@app.com" 19880909 20160313 "admin" 20160316 "admin" True

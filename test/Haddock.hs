@@ -20,6 +20,6 @@ main = do
         else putStr output >> exitFailure
 
 match :: String -> [Int]
-match = fmap read . concat . catMaybes . fmap (matchRegex pattern) . lines
+match = fmap read . concat . catMaybes . fmap (matchRegex pat) . lines
   where
-    pattern = mkRegex "^ *([0-9]*)% "
+    pat = mkRegex "^ *([0-9]*)%"

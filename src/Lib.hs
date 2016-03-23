@@ -32,7 +32,7 @@ withAuth h = do
 
 parseAuthorizationHeader :: Maybe B.ByteString -> Maybe (B.ByteString, B.ByteString)
 parseAuthorizationHeader Nothing = Nothing
-parseAuthorizationHeader (Just x) = case (B.split ' ' x) of
+parseAuthorizationHeader (Just x) = case B.split ' ' x of
   ("Basic" : y : _) ->
     if B.length y == 0 then
       Nothing
@@ -41,7 +41,7 @@ parseAuthorizationHeader (Just x) = case (B.split ' ' x) of
         case decodedValue of
           Left e -> Nothing
           Right val ->
-            case (B.split ':' val) of
+            case B.split ':' val of
               (user:pass:_) -> Just (user, pass)
               _ -> Nothing
   _ -> Nothing

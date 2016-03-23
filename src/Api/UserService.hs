@@ -39,7 +39,7 @@ validateUserCredentials = do
       if isValid then
         writeLBS . encode $ username ++ ":" ++ password
       else
-        writeLBS . encode $ ("Invalid username or password! Given (" ++ username ++ ":" ++ password ++ ")")
+        writeLBS . encode $ "Invalid username or password! Given (" ++ username ++ ":" ++ password ++ ")"
 
 getDefaultString :: Maybe B.ByteString -> String
 getDefaultString Nothing = ""
@@ -48,7 +48,7 @@ getDefaultString (Just a)  = B.unpack a
 fetchAllUsers :: Handler b UserService ()
 fetchAllUsers = do
   _ <- liftIO $ createUser buildUser
-  users <- liftIO $ searchUsers
+  users <- liftIO searchUsers
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
   writeLBS . encode $ users

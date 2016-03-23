@@ -22,10 +22,10 @@ validateUser username password = do
 
 checkMaybeBool :: Maybe Bool -> Bool
 checkMaybeBool Nothing = False
-checkMaybeBool (Just a) = a == True
+checkMaybeBool (Just a) = a
 
 checkPassword :: TPassword -> Document -> Bool
-checkPassword password user = (B.at "password" user) == password
+checkPassword password user = B.at "password" user == password
 
 createUser :: User -> IO Value
 createUser user = connectDb $ insert "users" (convertUserToDocument user)
@@ -45,7 +45,7 @@ convertUserDocumentToUser doc = User 1 (B.at "username" doc) (B.at "password" do
 
 ctu :: [Document] -> [User]
 ctu [x] = [convertUserDocumentToUser x]
-ctu (x:xs) = (convertUserDocumentToUser x):ctu xs
+ctu (x:xs) = convertUserDocumentToUser x:ctu xs
 
 convertUserToDocument user = ["username" =: username user, "password" =: password user, "email" =: email user]
 

@@ -27,7 +27,7 @@ getInfo :: Handler b InfoService ()
 getInfo = do
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
-  writeText ("{\"name\":\"hueb service\",\"description\":\"Provides base template to start new web services in haskell\",\"status\": \"UP\"}")
+  writeText "{\"name\":\"hueb service\",\"description\":\"Provides base template to start new web services in haskell\",\"status\": \"UP\"}"
 
 getEnv :: Handler b InfoService ()
 getEnv = do
