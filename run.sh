@@ -1,1 +1,1 @@
-stack exec heub
+stack build && stack exec heub
