@@ -1,14 +1,39 @@
 ---
 - hosts: app
+  vars:
+    supervisord_config_file: /etc/supervisord.d/heub.ini
+    app_home_path: /opt/heub
   tasks:
   - include: tasks/common.yml
 
   - name: "install nginx"
     yum: name=nginx state=latest
     sudo: yes
+
   - name: "ensure ngix is running"
     service: name=nginx state=started enabled=yes
     sudo: yes
+
+  - name: "copying app init.d config"
+    copy: src=files/heub.init.d dest=/etc/init.d/heub
+    sudo: yes
+
+  - name: "create necessary app directories"
+    shell: mkdir -p {{app_home_path}} && mkdir -p {{app_home_path}}/log && mkdir -p {{app_home_path}}/bin
+    sudo: yes
+
+  - name: "install supervisor"
+    yum: name=supervisor state=latest
+    sudo: yes
+
+  - name: "create supervisor config"
+    copy: src=files/supervisord.conf dest={{supervisord_config_file}}
+    sudo: yes
+
+  - name: "ensure supervisor is running"
+    service: name=supervisord.service state=restarted enabled=yes
+    sudo: yes
+
   handlers:
   - name: "restart nginx"
     service: name=nginx state=restarted

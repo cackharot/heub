@@ -5,6 +5,10 @@
   yum: name=go-server state=latest
   sudo: yes
 
+- name: "copy pipeline config"
+  copy: src=files/cruise-config.xml dest=/etc/­go/cr­uise-­confi­g.xml
+  sudo: yes
+
 - name: "start go server"
   service: name=go-server state=started
   sudo: yes

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="77">
+  <server artifactsdir="artifacts" purgeStart="1.0" purgeUpto="2.0" commandRepositoryLocation="default" serverId="" />
+  <pipelines group="Development">
+    <pipeline name="Build">
+      <environmentvariables>
+        <variable name="STACK_ROOT">
+          <value>/var/lib/go-agent/.stack</value>
+        </variable>
+      </environmentvariables>
+      <materials>
+        <git url="https://github.com/cackharot/heub.git" dest="heub">
+          <filter>
+            <ignore pattern="infra" />
+          </filter>
+        </git>
+      </materials>
+      <stage name="build">
+        <jobs>
+          <job name="build-app">
+            <tasks>
+              <exec command="stack" workingdir="heub">
+                <arg>build</arg>
+                <arg>--allow-different-user</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+      <stage name="test">
+        <jobs>
+          <job name="test">
+            <tasks>
+              <exec command="stack" workingdir="heub">
+                <arg>test</arg>
+                <arg>--allow-different-user</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+  </pipelines>
+  <agents>
+    <agent hostname="goagent.local" ipaddress="10.0.2.15" uuid="" />
+  </agents>
+</cruise>
+
