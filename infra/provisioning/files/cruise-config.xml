@@ -15,16 +15,38 @@
           </filter>
         </git>
       </materials>
+      <stage name="Setup">
+        <jobs>
+          <job name="setup">
+            <tasks>
+              <exec command="stack" workingdir="heub">
+                <arg>setup</arg>
+                <arg>--allow-different-user</arg>
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
       <stage name="build">
         <jobs>
           <job name="build-app">
             <tasks>
+              <exec command="mkdir" workingdir="heub">
+                <arg>-p</arg>
+                <arg>dist</arg>
+                <runif status="passed" />
+              </exec>
               <exec command="stack" workingdir="heub">
                 <arg>build</arg>
                 <arg>--allow-different-user</arg>
+                <arg>--local-bin-path</arg>
+                <arg>dist/</arg>
                 <runif status="passed" />
               </exec>
             </tasks>
+            <artifacts>
+              <artifact src="heub/.stack-work/install/x86_64-linux/lts-5.5/7.10.3/bin/heub" dest="heub" />
+            </artifacts>
           </job>
         </jobs>
       </stage>
@@ -35,6 +57,33 @@
               <exec command="stack" workingdir="heub">
                 <arg>test</arg>
                 <arg>--allow-different-user</arg>
+                <arg>--local-bin-path</arg>
+                <arg>dist/</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+            <artifacts>
+              <artifact src="heub/.stack-work/install/x86_64-linux/lts-5.5/7.10.3/bin/heub" />
+            </artifacts>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+    <pipeline name="Deploy" isLocked="false">
+      <materials>
+        <pipeline pipelineName="Build" stageName="test" materialName="heub" />
+      </materials>
+      <stage name="deploy-app">
+        <approval type="manual" />
+        <jobs>
+          <job name="deploy-scp">
+            <tasks>
+              <fetchartifact pipeline="Build" stage="test" job="test" srcfile="heub">
+                <runif status="passed" />
+              </fetchartifact>
+              <exec command="scp">
+                <arg>heub</arg>
+                <arg>vagrant@192.168.33.10:/opt/heub/bin</arg>
                 <runif status="passed" />
               </exec>
             </tasks>
