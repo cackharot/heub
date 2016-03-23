@@ -1,12 +1,12 @@
 ---
 - name: "install net tools"
-  yum: name=net-tools state=latest
+  yum: name=net-tools state=present
   sudo: yes
 
 - name: "install epel-release"
-  yum: name=epel-release state=latest
+  yum: name=epel-release state=present
   sudo: yes
 
 - name: "install git"
-  yum: name=git state=latest
+  yum: name=git state=present
   sudo: yes

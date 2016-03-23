@@ -3,5 +3,5 @@
   copy: src=files/thoughtworks-go.repo dest=/etc/yum.repos.d/thoughtworks-go.repo
 
 - name: "install java 1.7"
-  yum: name=java-1.7.0-openjdk state=latest
+  yum: name=java-1.7.0-openjdk state=present
   sudo: yes

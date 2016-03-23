@@ -2,7 +2,7 @@
 - include: gocommon.yml
 
 - name: "install go-server"
-  yum: name=go-server state=latest
+  yum: name=go-server state=present
   sudo: yes
 
 - name: "copy pipeline config"

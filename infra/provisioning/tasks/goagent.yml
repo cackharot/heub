@@ -2,11 +2,23 @@
 - include: gocommon.yml
 
 - name: "install build essentials"
-  yum: name=zlib-devel state=latest
+  yum: name=zlib-devel state=present
+  sudo: yes
+
+- name: "install mongodb"
+  yum: name=mongodb state=present
+  sudo: yes
+
+- name: "install mongodb-server"
+  yum: name=mongodb-server state=present
+  sudo: yes
+
+- name: "ensure mongodb is running"
+  service: name=mongod state=started enabled=yes
   sudo: yes
 
 - name: "install go-agent"
-  yum: name=go-agent state=latest
+  yum: name=go-agent state=present
   sudo: yes
 
 - name: "configuring go agent"
@@ -22,5 +34,5 @@
   copy: src=files/fpco.repo dest=/etc/yum.repos.d/fpco.repo
 
 - name: "install haskell stack"
-  yum: name=stack state=latest
+  yum: name=stack state=present
   sudo: yes

@@ -7,7 +7,7 @@
   - include: tasks/common.yml
 
   - name: "install nginx"
-    yum: name=nginx state=latest
+    yum: name=nginx state=present
     sudo: yes
 
   - name: "ensure ngix is running"
@@ -22,8 +22,20 @@
     shell: mkdir -p {{app_home_path}} && mkdir -p {{app_home_path}}/log && mkdir -p {{app_home_path}}/bin
     sudo: yes
 
+  - name: "install mongodb"
+    yum: name=mongodb state=present
+    sudo: yes
+
+  - name: "install mongodb-server"
+    yum: name=mongodb-server state=present
+    sudo: yes
+
+  - name: "ensure mongodb is running"
+    service: name=mongod state=started enabled=yes
+    sudo: yes
+
   - name: "install supervisor"
-    yum: name=supervisor state=latest
+    yum: name=supervisor state=present
     sudo: yes
 
   - name: "create supervisor config"
