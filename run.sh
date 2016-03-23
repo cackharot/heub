@@ -1,1 +1,1 @@
-stack exec l1-exe
+stack exec heub
