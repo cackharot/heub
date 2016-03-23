@@ -1,6 +1,8 @@
 ---
 - hosts: app
   tasks:
+  - include: tasks/common.yml
+
   - name: "install nginx"
     yum: name=nginx state=latest
     sudo: yes

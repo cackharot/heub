@@ -1,1 +1,7 @@
 ---
+- hosts: goagent
+  vars:
+    go_server_ip: 192.168.33.2
+  tasks:
+  - include: tasks/common.yml
+  - include: tasks/goagent.yml

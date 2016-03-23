@@ -1,0 +1,22 @@
+---
+- include: gocommon.yml
+
+- name: "install go-agent"
+  yum: name=go-agent state=latest
+  sudo: yes
+
+- name: "configuring go agent"
+  sudo: yes
+  shell: "sed -i 's/GO_SERVER=127.0.0.1/GO_SERVER={{go_server_ip}}/g' /etc/default/go-agent"
+
+- name: "start go agent"
+  service: name=go-agent state=started
+  sudo: yes
+
+- name: "install yum haskell stack repo"
+  sudo: yes
+  copy: src=files/fpco.repo dest=/etc/yum.repos.d/fpco.repo
+
+- name: "install haskell stack"
+  yum: name=stack state=latest
+  sudo: yes

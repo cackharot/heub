@@ -1,0 +1,8 @@
+---
+- name: "install net tools"
+  yum: name=net-tools state=latest
+  sudo: yes
+
+- name: "install epel-release"
+  yum: name=epel-release state=latest
+  sudo: yes
