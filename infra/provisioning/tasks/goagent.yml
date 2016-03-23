@@ -1,6 +1,10 @@
 ---
 - include: gocommon.yml
 
+- name: "install build essentials"
+  yum: name=zlib-devel state=latest
+  sudo: yes
+
 - name: "install go-agent"
   yum: name=go-agent state=latest
   sudo: yes
