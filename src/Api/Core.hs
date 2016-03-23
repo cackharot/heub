@@ -10,8 +10,12 @@ import qualified Data.ByteString.Char8 as B
 import Control.Lens
 
 import Api.UserService
+import Api.InfoService
 
-data Api = Api { _userService :: Snaplet UserService }
+data Api = Api {
+   _userService :: Snaplet UserService
+ , _infoService :: Snaplet InfoService
+}
 
 makeLenses ''Api
 
@@ -24,5 +28,6 @@ respondOk = modifyResponse $ setResponseCode 200
 apiInit :: SnapletInit b Api
 apiInit = makeSnaplet "api" "Core Api" Nothing $ do
         userService <- nestSnaplet "user" userService userServiceApiInit
+        infoService <- nestSnaplet "" infoService infoServiceApiInit
         addRoutes apiRoutes
-        return $ Api userService
+        return $ Api userService infoService
