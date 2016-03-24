@@ -12,23 +12,27 @@ import qualified Data.ByteString.Char8 as B
 
 import Control.Monad.Trans (liftIO)
 
+import Services.AuthenticationService
+
 {- |
     An Snap transparent handler to handle HTTP Basic authentication
 -}
 withAuth :: Handler a b () -> Handler a b ()
-withAuth h = do
+withAuth nextHandler = do
   rq <- getRequest
   let mh = getHeader "Authorization" rq
   let ph = parseAuthorizationHeader mh
   --liftIO $ print ph
-  isValid <- liftIO $ testAuth ph
-  if not isValid then
+  if ph == Nothing then
     do
-      modifyResponse $ setResponseCode 401
-      modifyResponse $ setHeader "Authorization" "Basic releam=heub"
-      writeText ""
+      throwChallenge
   else
-    h
+    do
+      isValid <- liftIO $ testAuth ph
+      if isValid then
+        nextHandler
+      else
+        throwAccessDenied
 
 parseAuthorizationHeader :: Maybe B.ByteString -> Maybe (B.ByteString, B.ByteString)
 parseAuthorizationHeader Nothing = Nothing
@@ -48,6 +52,15 @@ parseAuthorizationHeader (Just x) = case B.split ' ' x of
 
 testAuth :: Maybe (B.ByteString, B.ByteString) -> IO Bool
 testAuth Nothing = return False
-testAuth (Just (user,pass)) = return isValidUser
-  where
-   isValidUser = user == "test" && pass == "pass@123"
+testAuth (Just (user,pass)) = validateUser (B.unpack user) (B.unpack pass)
+
+throwChallenge :: Handler a b ()
+throwChallenge = do
+  modifyResponse $ setResponseCode 401
+  modifyResponse $ setHeader "WWW-Authenticate" "Basic releam=heub"
+  writeBS ""
+
+throwAccessDenied :: Handler a b ()
+throwAccessDenied = do
+  modifyResponse $ setResponseCode 403
+  writeText "Access Denied!"

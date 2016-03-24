@@ -47,7 +47,7 @@ getDefaultString (Just a)  = B.unpack a
 
 fetchAllUsers :: Handler b UserService ()
 fetchAllUsers = do
-  _ <- liftIO $ createUser buildUser
+  --_ <- liftIO $ createUser buildUser
   users <- liftIO searchUsers
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
