@@ -23,7 +23,8 @@ makeLenses ''UserService
 
 userApiRoutes :: [(B.ByteString, Handler b UserService ())]
 userApiRoutes = [("login", method POST validateUserCredentials)
-                ,("search", method GET fetchAllUsers)]
+                ,("search", method GET fetchAllUsers)
+                ,("create", method PUT createUserDetails)]
 
 
 validateUserCredentials :: Handler b UserService ()
@@ -44,6 +45,23 @@ validateUserCredentials = do
 getDefaultString :: Maybe B.ByteString -> String
 getDefaultString Nothing = ""
 getDefaultString (Just a)  = B.unpack a
+
+createUserDetails :: Handler b UserService ()
+createUserDetails = do
+  rq <- getRequest
+  userJsonString <- readRequestBody 4000
+  case eitherDecode userJsonString of
+    Left e -> invalidRequest $ B.pack e
+    Right user ->
+      do
+        liftIO $ createUser user
+        modifyResponse $ setResponseStatus 202 "Accepted"
+        writeBS "Accepted"
+
+invalidRequest :: B.ByteString -> Handler b a ()
+invalidRequest message = do
+  modifyResponse $ setResponseStatus 402 "Bad request"
+  writeBS message
 
 fetchAllUsers :: Handler b UserService ()
 fetchAllUsers = do

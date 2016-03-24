@@ -11,6 +11,7 @@ import qualified Data.ByteString.Base64 as D
 import qualified Data.ByteString.Char8 as B
 
 import Control.Monad.Trans (liftIO)
+import Data.Maybe
 
 import Services.AuthenticationService
 
@@ -23,8 +24,7 @@ withAuth nextHandler = do
   let mh = getHeader "Authorization" rq
   let ph = parseAuthorizationHeader mh
   --liftIO $ print ph
-  if ph == Nothing then
-    do
+  if isNothing ph then
       throwChallenge
   else
     do
