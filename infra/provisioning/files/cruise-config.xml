@@ -54,6 +54,11 @@
         <jobs>
           <job name="test">
             <tasks>
+              <exec command="rm" workingdir="heub">
+                <arg>-f</arg>
+                <arg>*.tix</arg>
+                <runif status="passed" />
+              </exec>
               <exec command="stack" workingdir="heub">
                 <arg>test</arg>
                 <arg>--allow-different-user</arg>
@@ -81,9 +86,19 @@
               <fetchartifact pipeline="Build" stage="test" job="test" srcfile="heub">
                 <runif status="passed" />
               </fetchartifact>
+              <exec command="ssh">
+                <arg>vagrant@192.168.33.10</arg>
+                <arg>sudo supervisorctl stop heub</arg>
+                <runif status="passed" />
+              </exec>
               <exec command="scp">
                 <arg>heub</arg>
                 <arg>vagrant@192.168.33.10:/opt/heub/bin</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="ssh">
+                <arg>vagrant@192.168.33.10</arg>
+                <arg>sudo supervisorctl start heub</arg>
                 <runif status="passed" />
               </exec>
             </tasks>
