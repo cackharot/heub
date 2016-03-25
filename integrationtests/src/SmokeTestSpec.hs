@@ -7,11 +7,16 @@ module SmokeTestSpec (spec) where
 import Test.Hspec
 import Network.Wreq
 import Control.Lens
+import Data.Maybe
+import Data.List
 import Data.Aeson
 import Data.Aeson.Types (defaultOptions)
 import Data.Aeson.Lens (key, nth)
 import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Lazy.UTF8 as LB
+
+import System.IO
+import System.Environment
 
 import Data.Text (Text, append)
 import qualified Data.Text as T
@@ -42,28 +47,33 @@ instance FromJSON EndPointDetails where
 instance FromJSON AppConfig where
   parseJSON = genericParseJSON defaultOptions
 
-defaultConfig = [r|
-baseUrl: http://localhost:8000
-endpoints:
-  - name: info
-    url: /api/info
-|]
+--defaultConfig = [r|
+--baseUrl: http://localhost:8000
+--endpoints:
+--  - name: info
+--    url: /api/info
+-- |]
 
-infoEndpoint :: String
-infoEndpoint = let config = Y.decodeEither defaultConfig :: Either String AppConfig in
+infoEndpoint :: String -> String
+infoEndpoint configContents = let config = Y.decodeEither (B.pack configContents) :: Either String AppConfig in
   case config of
     Left e -> error e
-    Right c -> let
-                infoEP = head (endpoints c)
-                infoUrl = baseUrl c `append` (endpointUrl infoEP)
-                in
-                  T.unpack infoUrl
+    Right c -> T.unpack infoUrl
+      where
+        infoEP = fromJust $ find (\x-> endpointName x == "info") (endpoints c)
+        infoUrl = baseUrl c `append` (endpointUrl infoEP)
+
+getConfigFilename :: IO FilePath
+getConfigFilename = do
+  mf <- lookupEnv "HEUB_TEST_CONFIG"
+  return $ fromMaybe "config/local.yml" mf
 
 spec :: Spec
 spec =
   describe "Application basic smoke test" $ do
     it "should expose /info endpoint" $ do
-      r <- get infoEndpoint
+      configContents <- getConfigFilename >>= readFile
+      r <- get $ infoEndpoint configContents
       let
         sc  = (r ^. responseStatus . statusCode)
         serviceName = (r ^? responseBody . key "name")
