@@ -1,0 +1,44 @@
+name:                integrationtests
+version:             0.1.0.0
+synopsis:            Initial project template from stack
+description:         Please see README.md
+homepage:            http://github.com/cackharot/heub#readme
+license:             MIT
+author:              cackharot
+maintainer:          cackharot@gmail.com
+copyright:           2016 cackharot
+category:            Test
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+test-suite smoke-tests
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      src
+  main-is:             Spec.hs
+  build-depends:       base
+                     , hspec
+                     , lens
+                     , wreq
+                     , text
+                     , aeson
+                     , bytestring
+                     , utf8-string
+                     , lens-aeson
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+executable heub-integration-tests
+  hs-source-dirs:      src
+  main-is:             Spec.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , hspec
+                     , lens
+                     , wreq
+                     , text
+                     , aeson
+                     , bytestring
+                     , utf8-string
+                     , lens-aeson
+  default-language:    Haskell2010
