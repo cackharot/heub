@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, ExtendedDefaultRules, ScopedTypeVariables #-}
-{-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE QuasiQuotes   #-}
 {-# LANGUAGE DeriveGeneric #-}
 
 module SmokeTestSpec (spec) where

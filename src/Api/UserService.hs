@@ -9,9 +9,11 @@ import           Snap.Snaplet
 import           Snap.Core
 import qualified Data.ByteString.Char8 as B
 import Data.Aeson
+import Data.Bson
 import Control.Lens
 import Control.Monad.State.Class
 import Control.Monad.Trans (liftIO)
+import Control.Applicative
 import Data.Maybe
 
 import App.Model
@@ -53,10 +55,36 @@ createUserDetails = do
   case eitherDecode userJsonString of
     Left e -> invalidRequest $ B.pack e
     Right user ->
-      do
-        liftIO $ createUser user
-        modifyResponse $ setResponseStatus 202 "Accepted"
-        writeBS "Accepted"
+      case validateUserDetails user of
+        e@(x:xs)-> throwError e
+        [] -> do
+                userId <- liftIO $ createUser user
+                modifyResponse $ setResponseStatus 202 "Created"
+                writeLBS . encode $ show userId
+
+uValidations :: [ValidationModel User]
+uValidations = [
+    ValidationModel (\x -> length (username x) > 4) "username" "should be atleast 4 characters long"
+  , ValidationModel (\x -> validEmail $ email x) "email" "enter a valid email address"
+  , ValidationModel (\x -> validPass $ password x) "password" "should be 6-20 characters long with atleast one !@#$%^&*"
+  ]
+
+validEmail a = length a > 5 && '@' `elem` a
+validPass p = length p > 6 && length p < 20 && any (\x -> x `elem` ['!', '#', '$', '%', '^', '&', '@', '*']) p
+
+validateUserDetails :: User -> [ValidationError]
+validateUserDetails user = catMaybes $ map (applyValidation user) uValidations
+
+applyValidation :: a -> ValidationModel a -> Maybe ValidationError
+applyValidation a (ValidationModel f fieldName message) = if f a then
+    Nothing
+  else
+    Just $ ValidationError fieldName message
+
+throwError :: ToJSON a => a -> Handler b UserService ()
+throwError e = do
+  modifyResponse $ setResponseStatus 412 "Validation error"
+  writeLBS . encode $ e
 
 invalidRequest :: B.ByteString -> Handler b a ()
 invalidRequest message = do

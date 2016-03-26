@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveGeneric     #-}
 
 module App.Model
 where
@@ -7,6 +8,7 @@ where
 import Data.Aeson
 import Data.Maybe
 import Control.Monad
+import GHC.Generics (Generic)
 
 type TUsername = String
 type TPassword = String
@@ -27,6 +29,15 @@ data User = User {
 , status :: Bool
 } deriving (Show, Eq, Read)
 
+data ValidationError = ValidationError {
+    fieldName :: String
+  , message :: String
+} deriving (Show, Eq, Generic)
+
+instance FromJSON ValidationError
+instance ToJSON ValidationError
+
+data ValidationModel a = ValidationModel (a -> Bool) String String
 
 instance ToJSON User where
   toJSON (User id username password displayName email dateOfBirth createdAt createdBy updatedBy updatedAt status) =
