@@ -4,6 +4,10 @@ module AuthenticationServiceSpec (spec) where
 
 import Test.Hspec
 import Test.QuickCheck
+--import System.Locale
+import Data.Time.Clock
+import Data.Time.Calendar
+import Data.Time.Format
 
 import App.Model
 import Services.AuthenticationService
@@ -20,39 +24,43 @@ spec :: Spec
 spec = around withCleanDatabase $
   describe "Authentication Service tests" $ do
     it "returns True given valid username and password" $ do
-      _ <- createUser buildUser
+      _ <- buildUser >>= createUser
       (validateUser "admin" "pass@123") >>= (`shouldBe` True)
 
     it "returns False given valid username and invalid password" $ do
-      _ <- createUser buildUser
+      _ <- buildUser >>= createUser
       (validateUser "admin" "invalid_pass") >>= (`shouldBe` False)
 
     it "returns False given invalid username" $ do
       (validateUser "invalid" "invalid") >>= (`shouldBe` False)
 
     it "creates new user in database given valid user details" $ do
-        _id <- createUser buildUser
-        actual <- db $ rest =<< find (select [] "users")
-        actual `shouldBe` [["_id" =: _id, "username" =: username buildUser, "password" =: password buildUser, "email" =: email buildUser]]
-
-    it "returns monogodb document given User data type" $
-      let user = buildUser
-          userDocument = ["username" =: username user, "password" =: password user, "email" =: email user] in
-        convertUserToDocument user `shouldBe` userDocument
+        user <- buildUser
+        _id <- createUser user
+        users <- db $ rest =<< find (select [] "users")
+        length users `shouldBe` 1
+        head users `shouldBe` ("_id" =: _id):convertUserToDocument user
 
     it "should find user by username" $ do
-        _id <- createUser buildUser
-        user <- findUser "admin"
-        user `shouldBe` Just ["_id" =: _id, "username" =: username buildUser, "password" =: password buildUser, "email" =: email buildUser]
+        user <- buildUser
+        _id <- createUser user
+        actualUser <- findUser "admin"
+        actualUser `shouldBe` Just (("_id" =: _id):convertUserToDocument user)
 
     it "should search all users" $ do
-      createUser buildUser
+      _ <- buildUser >>= createUser
       users <- searchUsers
       length users `shouldBe` 1
-      head users `shouldBe` buildUser
+      username (head users) `shouldBe` "admin"
 
 
-buildUser = User 1 "admin" "pass@123" "display admin" "admin@app.com" 19880909 20160313 "admin" 20160316 "admin" True
+buildUser :: IO User
+buildUser = do
+  ct <- getCurrentTime
+  let
+    tstr = formatTime defaultTimeLocale "%c" ct
+    t = parseTimeOrError True defaultTimeLocale "%c" tstr in
+    return $ User "" "admin" "pass@123" "display admin" "admin@app.com" t t "admin" t "admin" True
 
 testDBName :: Database
 testDBName = "testAppDb"

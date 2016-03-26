@@ -2,21 +2,28 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveGeneric     #-}
 
-module App.Model
+module App.Model (
+      TUsername
+    , TPassword
+    , User(..)
+    , ValidationError(..)
+    , ValidationModel(..)
+  )
 where
 
 import Data.Aeson
 import Data.Maybe
+import Data.Time.Clock
+import Data.Time.Calendar
+import Data.DateTime (DateTime)
 import Control.Monad
 import GHC.Generics (Generic)
 
 type TUsername = String
 type TPassword = String
 
-type DateTime = Integer
-
 data User = User {
-  id :: Integer
+  _id :: String
 , username :: TUsername
 , password :: TPassword
 , displayName :: String
@@ -40,22 +47,24 @@ instance ToJSON ValidationError
 data ValidationModel a = ValidationModel (a -> Bool) String String
 
 instance ToJSON User where
-  toJSON (User id username password displayName email dateOfBirth createdAt createdBy updatedBy updatedAt status) =
-    object [ "id" .= id, "username" .= username, "email" .= email, "display_name" .= displayName, "date_of_birth" .= dateOfBirth
+  toJSON (User _id username password displayName email dateOfBirth createdAt createdBy updatedBy updatedAt status) =
+    object [ "id" .= _id, "username" .= username, "email" .= email, "display_name" .= displayName, "date_of_birth" .= dateOfBirth
       , "created_at" .= createdAt, "created_by" .= createdBy, "updated_at" .= updatedAt, "updated_by" .= updatedBy
       , "status" .= status ]
 
 instance FromJSON User where
   parseJSON (Object v) = User <$>
-                          v .:? "id" .!= 1 <*>
+                          v .:? "_id" .!= "1" <*>
                           v .: "username" <*>
                           v .: "password" <*>
                           v .: "display_name" <*>
                           v .: "email" <*>
-                          v .:? "date_of_birth" .!= 19880909 <*>
-                          v .:? "created_at" .!= 20160313 <*>
+                          v .:? "date_of_birth" .!=  sampleTestTime <*>
+                          v .:? "created_at" .!= sampleTestTime <*>
                           v .:? "created_by" .!= "admin" <*>
-                          v .:? "updated_at" .!= 20160316 <*>
+                          v .:? "updated_at" .!= sampleTestTime <*>
                           v .:? "updated_by" .!= "admin" <*>
                           v .:? "status" .!= True
   parseJSON _          = mzero
+
+sampleTestTime = UTCTime (fromGregorian 2016 03 11) (secondsToDiffTime 0)

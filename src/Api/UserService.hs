@@ -93,13 +93,11 @@ invalidRequest message = do
 
 fetchAllUsers :: Handler b UserService ()
 fetchAllUsers = do
-  --_ <- liftIO $ createUser buildUser
   users <- liftIO searchUsers
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
   writeLBS . encode $ users
 
-buildUser = User 1 "admin" "pass@123" "display admin" "admin@app.com" 19880909 20160313 "admin" 20160316 "admin" True
 
 userServiceApiInit :: SnapletInit b UserService
 userServiceApiInit = makeSnaplet "userService" "User service api" Nothing $ do
