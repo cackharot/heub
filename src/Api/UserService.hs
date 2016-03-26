@@ -73,7 +73,7 @@ validEmail a = length a > 5 && '@' `elem` a
 validPass p = length p > 6 && length p < 20 && any (\x -> x `elem` ['!', '#', '$', '%', '^', '&', '@', '*']) p
 
 validateUserDetails :: User -> [ValidationError]
-validateUserDetails user = mapMaybes (applyValidation user) uValidations
+validateUserDetails user = mapMaybe (applyValidation user) uValidations
 
 applyValidation :: a -> ValidationModel a -> Maybe ValidationError
 applyValidation a (ValidationModel f fieldName message) = if f a then
