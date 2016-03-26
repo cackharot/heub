@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, ExtendedDefaultRules, ScopedTypeVariables #-}
-{-# LANGUAGE QuasiQuotes   #-}
+--{-# LANGUAGE QuasiQuotes   #-}
 {-# LANGUAGE DeriveGeneric #-}
 
 module SmokeTestSpec (spec) where
@@ -61,7 +61,7 @@ infoEndpoint configContents = let config = Y.decodeEither (B.pack configContents
     Right c -> T.unpack infoUrl
       where
         infoEP = fromJust $ find (\x-> endpointName x == "info") (endpoints c)
-        infoUrl = baseUrl c `append` (endpointUrl infoEP)
+        infoUrl = baseUrl c `append` endpointUrl infoEP
 
 getConfigFilename :: IO FilePath
 getConfigFilename = do

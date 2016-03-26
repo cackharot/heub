@@ -65,15 +65,15 @@ createUserDetails = do
 uValidations :: [ValidationModel User]
 uValidations = [
     ValidationModel (\x -> length (username x) > 4) "username" "should be atleast 4 characters long"
-  , ValidationModel (\x -> validEmail $ email x) "email" "enter a valid email address"
-  , ValidationModel (\x -> validPass $ password x) "password" "should be 6-20 characters long with atleast one !@#$%^&*"
+  , ValidationModel (validEmail . email) "email" "enter a valid email address"
+  , ValidationModel (validPass . password) "password" "should be 6-20 characters long with atleast one !@#$%^&*"
   ]
 
 validEmail a = length a > 5 && '@' `elem` a
 validPass p = length p > 6 && length p < 20 && any (\x -> x `elem` ['!', '#', '$', '%', '^', '&', '@', '*']) p
 
 validateUserDetails :: User -> [ValidationError]
-validateUserDetails user = catMaybes $ map (applyValidation user) uValidations
+validateUserDetails user = mapMaybes (applyValidation user) uValidations
 
 applyValidation :: a -> ValidationModel a -> Maybe ValidationError
 applyValidation a (ValidationModel f fieldName message) = if f a then
