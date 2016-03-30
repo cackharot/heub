@@ -21,7 +21,8 @@ makeLenses ''InfoService
 
 infoApiRoutes :: [(B.ByteString, Handler b InfoService ())]
 infoApiRoutes = [("info", method GET getInfo)
-                ,("env", withAuth $ method GET getEnv)]
+                ,("env", withAuth $ method GET getEnv)
+                ,("config", method GET getConfig)]
 
 getInfo :: Handler b InfoService ()
 getInfo = do
@@ -34,6 +35,13 @@ getEnv = do
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
   writeText "env protected endpoint"
+
+getConfig :: Handler b InfoService ()
+getConfig = do
+  r <- getRequest
+  modifyResponse $ setHeader "Content-Type" "application/json"
+  modifyResponse $ setResponseCode 200
+  writeBS $ rqRemoteAddr r
 
 infoServiceApiInit :: SnapletInit b InfoService
 infoServiceApiInit = makeSnaplet "infoService" "Provies info and health endpoints to reports healthiness of the service" Nothing $ do
