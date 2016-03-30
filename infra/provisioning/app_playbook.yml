@@ -3,6 +3,7 @@
   vars:
     supervisord_config_file: /etc/supervisord.d/heub.ini
     app_home_path: /opt/heub
+    nginx_site_config_path: /etc/nginx/conf.d/
   tasks:
   - include: tasks/common.yml
 
@@ -10,8 +11,16 @@
     yum: name=nginx state=present
     sudo: yes
 
+  - name: "copy app site nginx config"
+    copy: src=files/heub.site.conf dest={{nginx_site_config_path}}
+    sudo: yes
+
+  - name: "fix SELinux permission issue for httpd"
+    shell: "setsebool httpd_can_network_connect on -P"
+    sudo: yes
+
   - name: "ensure ngix is running"
-    service: name=nginx state=started enabled=yes
+    service: name=nginx state=restarted enabled=yes
     sudo: yes
 
   - name: "copying app init.d config"

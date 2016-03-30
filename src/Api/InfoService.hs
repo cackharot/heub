@@ -8,6 +8,7 @@ where
 import           Snap.Snaplet
 import           Snap.Core
 import qualified Data.ByteString.Char8 as B
+import qualified Data.CaseInsensitive as CI
 import Data.Aeson
 import Control.Lens
 import Control.Monad.State.Class
@@ -41,7 +42,8 @@ getConfig = do
   r <- getRequest
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
-  writeBS $ rqRemoteAddr r
+  --writeBS $ rqRemoteAddr r
+  writeLBS . encode $ map (\(x,y) -> (B.unpack $ CI.original x, B.unpack y)) $ listHeaders r
 
 infoServiceApiInit :: SnapletInit b InfoService
 infoServiceApiInit = makeSnaplet "infoService" "Provies info and health endpoints to reports healthiness of the service" Nothing $ do
