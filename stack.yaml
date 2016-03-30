@@ -5,4 +5,5 @@ packages:
 extra-deps:
 - snap-loader-static-0.9.0.2
 - datetime-0.3.1
+- data-lens-2.10.7
 resolver: lts-5.5

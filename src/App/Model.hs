@@ -6,6 +6,10 @@ module App.Model (
       TUsername
     , TPassword
     , User(..)
+    , Role(..)
+    , UserRole(..)
+    , Privilege(..)
+    , RolePrivilege(..)
     , ValidationError(..)
     , ValidationModel(..)
   )
@@ -35,6 +39,46 @@ data User = User {
 , updatedBy :: String
 , status :: Bool
 } deriving (Show, Eq, Read)
+
+data Role = Role {
+    roleId :: String
+  , roleName :: String
+  , roleDescription :: String
+  , roleStatus :: Bool
+} deriving (Show, Eq, Read, Generic)
+
+instance FromJSON Role
+instance ToJSON Role
+
+data UserRole = UserRole {
+    userRoleId :: String
+  , userRoleUserId :: String
+  , userRoleRoleId :: String
+  , userRoleStatus :: Bool
+} deriving (Show, Eq, Read, Generic)
+
+instance FromJSON UserRole
+instance ToJSON UserRole
+
+data Privilege = Privilege {
+    privilegeId :: String
+  , privilegeName :: String
+  , privilegeDescription :: String
+  , privilegeStatus :: Bool
+} deriving (Show, Eq, Read, Generic)
+
+instance FromJSON Privilege
+instance ToJSON Privilege
+
+data RolePrivilege = RolePrivilege {
+    rolePrivilegeId :: String
+  , rolePrivilegeRoleId :: String
+  , rolePrivilegePrivilegeId :: String
+  , rolePrivilegeStatus :: Bool
+} deriving (Show, Eq, Read, Generic)
+
+instance FromJSON RolePrivilege
+instance ToJSON RolePrivilege
 
 data ValidationError = ValidationError {
     fieldName :: String
