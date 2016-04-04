@@ -40,17 +40,20 @@ getEnv = do
 
 getConfig :: Handler b InfoService ()
 getConfig = do
-  r <- getRequest
-  modifyResponse $ setHeader "Content-Type" "application/json"
-  modifyResponse $ setResponseCode 200
+  r <- doRequest
   writeLBS . encode $ map (\(x,y) -> (B.unpack $ CI.original x, B.unpack y)) $ listHeaders r
 
 getRemoteIP :: Handler b InfoService ()
 getRemoteIP = do
-  r <- getRequest
+  r <- doRequest
+  writeBS $ rqRemoteAddr r
+
+doRequest :: Handler b InfoService Request
+doRequest = do
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
-  writeBS $ rqRemoteAddr r
+  getRequest
+
 
 infoServiceApiInit :: SnapletInit b InfoService
 infoServiceApiInit = makeSnaplet "infoService" "Provies info and health endpoints to reports healthiness of the service" Nothing $ do
