@@ -1,10 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
 
-module Services.AuthenticationService
+module Services.AuthenticationService(
+    validateUser
+  , createUser
+  , findUser
+  , searchUsers
+  , convertUserToDocument
+  , convertUserDocumentToUser
+  )
 where
 
-import Database.MongoDB    (Database, Action, Document, Document, Value, access,
+import Database.MongoDB    (MongoContext(..), Database, Action, Document, Document, Value, access,
                             close, connect, delete, exclude, find, findOne,
                             host, insert, insertMany, master, project, rest,
                             select, sort, (=:))
@@ -17,20 +24,20 @@ import Data.Time.Calendar
 
 import App.Model
 
-validateUser :: TUsername -> TPassword -> IO Bool
-validateUser username password = do
-  maybeUser <- findUser username
+validateUser :: IO MongoContext -> TUsername -> TPassword -> IO Bool
+validateUser dbContext username password = do
+  maybeUser <- findUser dbContext username
   return $ maybe False (\x->B.at "password" x == password) maybeUser
 
-createUser :: User -> IO Value
-createUser user = connectDb $ insert "users" (convertUserToDocument user)
+createUser :: IO MongoContext -> User -> IO Value
+createUser dbContext user = connectDb dbContext $ insert "users" (convertUserToDocument user)
 
-findUser :: TUsername -> IO (Maybe Document)
-findUser username = connectDb $ findOne $ select ["username" =: username] "users"
+findUser :: IO MongoContext -> TUsername -> IO (Maybe Document)
+findUser dbContext username = connectDb dbContext $ findOne $ select ["username" =: username] "users"
 
-searchUsers :: IO [User]
-searchUsers = do
-  users <- connectDb $ rest =<< find (select [] "users")
+searchUsers :: IO MongoContext -> IO [User]
+searchUsers dbContext = do
+  users <- connectDb dbContext $ rest =<< find (select [] "users")
   return $ map convertUserDocumentToUser users
 
 convertUserDocumentToUser :: Document -> User
@@ -46,11 +53,9 @@ convertUserToDocument user = [
   "updated_by" =: updatedBy user, "updated_at" =: updatedAt user,
   "status" =: status user]
 
-dbName :: Database
-dbName = "testAppDb"
-
-connectDb cmd = do
-  pipe <- connect $ host "localhost"
-  e <- access pipe master dbName cmd
-  close pipe
+connectDb :: IO MongoContext -> Action IO a -> IO a
+connectDb dbContext cmd = do
+  ctx <- dbContext
+  e <- access (mongoPipe ctx) (mongoAccessMode ctx) (mongoDatabase ctx) cmd
+  close (mongoPipe ctx)
   return e

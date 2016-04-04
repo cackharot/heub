@@ -19,7 +19,12 @@ import Data.Maybe
 import App.Model
 import Services.AuthenticationService
 
-data UserService = UserService
+import Database.MongoDB    (MongoContext(..), Database, Action, Document, Document, Value, access,
+                            close, connect, master, host)
+
+data UserService = UserService {
+  _dbContext :: IO MongoContext
+}
 
 makeLenses ''UserService
 
@@ -31,6 +36,7 @@ userApiRoutes = [("login", method POST validateUserCredentials)
 
 validateUserCredentials :: Handler b UserService ()
 validateUserCredentials = do
+  dbCtx <- gets _dbContext
   muser <- getPostParam "username"
   mpass <- getPostParam "password"
   modifyResponse $ setResponseCode 200
@@ -38,7 +44,7 @@ validateUserCredentials = do
     username = getDefaultString muser
     password = getDefaultString mpass in
     do
-      isValid <- liftIO $ validateUser username password
+      isValid <- liftIO $ validateUser dbCtx username password
       if isValid then
         writeLBS . encode $ username ++ ":" ++ password
       else
@@ -50,6 +56,7 @@ getDefaultString (Just a)  = B.unpack a
 
 createUserDetails :: Handler b UserService ()
 createUserDetails = do
+  dbCtx <- gets _dbContext
   rq <- getRequest
   userJsonString <- readRequestBody 4000
   case eitherDecode userJsonString of
@@ -58,7 +65,7 @@ createUserDetails = do
       case validateUserDetails user of
         e@(x:xs)-> throwError e
         [] -> do
-                userId <- liftIO $ createUser user
+                userId <- liftIO $ createUser dbCtx user
                 modifyResponse $ setResponseStatus 202 "Created"
                 writeLBS . encode $ show userId
 
@@ -93,7 +100,8 @@ invalidRequest message = do
 
 fetchAllUsers :: Handler b UserService ()
 fetchAllUsers = do
-  users <- liftIO searchUsers
+  dbCtx <- gets _dbContext
+  users <- liftIO $ searchUsers dbCtx
   modifyResponse $ setHeader "Content-Type" "application/json"
   modifyResponse $ setResponseCode 200
   writeLBS . encode $ users
@@ -102,4 +110,12 @@ fetchAllUsers = do
 userServiceApiInit :: SnapletInit b UserService
 userServiceApiInit = makeSnaplet "userService" "User service api" Nothing $ do
                       addRoutes userApiRoutes
-                      return UserService
+                      return $ UserService dbConfiguration
+
+dbName :: Database
+dbName = "devAppDb"
+
+dbConfiguration :: IO MongoContext
+dbConfiguration = do
+  pipe <- connect $ host "localhost"
+  return $ MongoContext pipe master dbName

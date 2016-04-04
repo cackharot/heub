@@ -13,6 +13,8 @@ import qualified Data.ByteString.Char8 as B
 import Control.Monad.Trans (liftIO)
 import Data.Maybe
 
+import Database.MongoDB (MongoContext(..), Database, connect, host, master)
+
 import Services.AuthenticationService
 
 {- |
@@ -52,7 +54,7 @@ parseAuthorizationHeader (Just x) = case B.split ' ' x of
 
 testAuth :: Maybe (B.ByteString, B.ByteString) -> IO Bool
 testAuth Nothing = return False
-testAuth (Just (user,pass)) = validateUser (B.unpack user) (B.unpack pass)
+testAuth (Just (user,pass)) = validateUser dbConfig (B.unpack user) (B.unpack pass)
 
 throwChallenge :: Handler a b ()
 throwChallenge = do
@@ -64,3 +66,11 @@ throwAccessDenied :: Handler a b ()
 throwAccessDenied = do
   modifyResponse $ setResponseCode 403
   writeText "Access Denied!"
+
+dbName :: Database
+dbName = "testAppDb"
+
+dbConfig :: IO MongoContext
+dbConfig = do
+  pipe <- connect $ host "localhost"
+  return $ MongoContext pipe master dbName
