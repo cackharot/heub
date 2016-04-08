@@ -12,6 +12,7 @@ module App.Model (
     , RolePrivilege(..)
     , ValidationError(..)
     , ValidationModel(..)
+    , AuthTokenResponse(..)
   )
 where
 
@@ -39,6 +40,14 @@ data User = User {
 , updatedBy :: String
 , status :: Bool
 } deriving (Show, Eq, Read)
+
+data AuthTokenResponse = AuthTokenResponse {
+    errorCode :: Integer
+  , errorMessage :: String
+  , details :: [String]
+} deriving (Show, Generic)
+
+instance ToJSON AuthTokenResponse
 
 data Role = Role {
     roleId :: String

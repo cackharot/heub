@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib (
-  withAuth
+    withAuth
   )
 where
 

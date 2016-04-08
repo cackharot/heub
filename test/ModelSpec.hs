@@ -12,6 +12,8 @@ import Data.Time.Calendar
 import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Lazy.UTF8 as LB
 
+import EncUtil (encryptMessage, decryptMessage)
+
 {-# ANN module "HLint: ignore Redundant do" #-}
 
 spec :: Spec
@@ -27,6 +29,10 @@ spec =
       encode [buildUser] `shouldBe` LB.fromString ("["++ ujs ++"]")
     it "should decode user json to user object" $ do
       (decode userJsonString :: Maybe User) `shouldBe` Just buildUser
+    it "should return encrypted string" $ do
+      encryptMessage (B.pack "mysecret") `shouldBe` "1grjQlAxOFk="
+    it "should return descrypted string" $ do
+      decryptMessage (B.pack "1grjQlAxOFk=") `shouldBe` "mysecret"
 
 userJsonString = "{\"email\":\"admin@app.com\",\"username\":\"admin\",\"password\":\"pass@123\",\"display_name\":\"display admin\"}"
 

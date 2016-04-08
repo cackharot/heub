@@ -19,6 +19,8 @@ import Data.Maybe
 import App.Model
 import Services.AuthenticationService
 
+import EncUtil (encryptMessage)
+
 import Database.MongoDB    (MongoContext(..), Database, Action, Document, Document, Value, access,
                             close, connect, master, host)
 
@@ -29,30 +31,30 @@ data UserService = UserService {
 makeLenses ''UserService
 
 userApiRoutes :: [(B.ByteString, Handler b UserService ())]
-userApiRoutes = [("login", method POST validateUserCredentials)
+userApiRoutes = [("login",  method POST createAuthToken)
                 ,("search", method GET fetchAllUsers)
                 ,("create", method PUT createUserDetails)]
 
 
-validateUserCredentials :: Handler b UserService ()
-validateUserCredentials = do
+createAuthToken :: Handler b UserService ()
+createAuthToken = do
   dbCtx <- gets _dbContext
   muser <- getPostParam "username"
   mpass <- getPostParam "password"
   modifyResponse $ setResponseCode 200
-  let
-    username = getDefaultString muser
-    password = getDefaultString mpass in
+  isValid <- liftIO $ validateUser dbCtx (getDefaultString muser) (getDefaultString mpass)
+  if isValid then
     do
-      isValid <- liftIO $ validateUser dbCtx username password
-      if isValid then
-        writeLBS . encode $ username ++ ":" ++ password
-      else
-        writeLBS . encode $ "Invalid username or password! Given (" ++ username ++ ":" ++ password ++ ")"
+      userDoc <- liftIO $ findUser dbCtx (getDefaultString muser)
+      writeLBS . encode $ createToken $ convertUserDocumentToUser $ fromJust userDoc
+  else
+    writeLBS . encode $ AuthTokenResponse 2001 "Invalid username or password given!" []
+
+createToken :: User -> String
+createToken u = B.unpack $ encryptMessage $ B.pack (_id u ++ ":" ++ username u)
 
 getDefaultString :: Maybe B.ByteString -> String
-getDefaultString Nothing = ""
-getDefaultString (Just a)  = B.unpack a
+getDefaultString a = B.unpack $ fromMaybe "" a
 
 createUserDetails :: Handler b UserService ()
 createUserDetails = do
