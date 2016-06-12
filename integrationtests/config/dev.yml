@@ -2,3 +2,9 @@ baseUrl: http://192.168.33.10:8081
 endpoints:
   - name: info
     url: /api/info
+  - name: login
+    url: /api/user/login
+  - name: create_user
+    url: /api/user/create
+  - name: search_user
+    url: /api/user/search

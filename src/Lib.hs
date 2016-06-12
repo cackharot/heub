@@ -17,6 +17,8 @@ import Database.MongoDB (MongoContext(..), Database, connect, host, master)
 
 import Services.AuthenticationService
 
+import EncUtil (decryptMessage)
+
 {- |
     An Snap transparent handler to handle HTTP Basic authentication
 -}
@@ -39,18 +41,32 @@ withAuth nextHandler = do
 parseAuthorizationHeader :: Maybe B.ByteString -> Maybe (B.ByteString, B.ByteString)
 parseAuthorizationHeader Nothing = Nothing
 parseAuthorizationHeader (Just x) = case B.split ' ' x of
-  ("Basic" : y : _) ->
-    if B.length y == 0 then
-      Nothing
-    else
-      let decodedValue=D.decode y in
-        case decodedValue of
-          Left e -> Nothing
-          Right val ->
-            case B.split ':' val of
-              (user:pass:_) -> Just (user, pass)
-              _ -> Nothing
+  ("Basic" : y : _) -> doParseBasicAuth y
+  ("Token" : token : _) -> doParseAuthToken token
   _ -> Nothing
+
+doParseBasicAuth :: B.ByteString -> Maybe (B.ByteString, B.ByteString)
+doParseBasicAuth y =
+  if B.length y == 0 then
+    Nothing
+  else
+    let decodedValue = D.decode y in
+      case decodedValue of
+        Left e -> Nothing
+        Right val ->
+          case B.split ':' val of
+            (user:pass:_) -> Just (user, pass)
+            _ -> Nothing
+
+doParseAuthToken :: B.ByteString -> Maybe (B.ByteString, B.ByteString)
+doParseAuthToken token =
+  if B.length token == 0 then
+    Nothing
+  else
+    let tVal = decryptMessage token in
+    case B.split ':' tVal of
+      (user:pass:_) -> Just (user, pass)
+      _ -> Nothing
 
 testAuth :: Maybe (B.ByteString, B.ByteString) -> IO Bool
 testAuth Nothing = return False

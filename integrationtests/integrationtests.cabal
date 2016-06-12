@@ -16,7 +16,9 @@ test-suite smoke-tests
   type:                exitcode-stdio-1.0
   hs-source-dirs:      src
   main-is:             Spec.hs
+  other-modules:       TestConfig
   build-depends:       base
+                     , mtl
                      , hspec
                      , lens
                      , wreq
@@ -35,6 +37,7 @@ executable heub-integration-tests
   main-is:             Spec.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
+                     , mtl
                      , hspec
                      , lens
                      , wreq
