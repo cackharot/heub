@@ -5,10 +5,20 @@
   yum: name=go-server state=present
   sudo: yes
 
+# - name: Add vagrant user to go group
+#   user: name=vagrant state=present groups=go append=yes
+#   sudo: yes
+
+# - file: path=/etc/go state=touch mode=0755
+#   sudo: yes
+
 - name: "copy pipeline config"
-  copy: src=files/cruise-config.xml dest=/etc/­go/cr­uise-­confi­g.xml
+  copy: src=files/cruise-config.xml dest=/etc/go/cruise-config.xml
   sudo: yes
 
+# - file: path=/etc/go/cruise-config.xml state=touch owner=go group=go mode=0755
+#   sudo: yes
+
 - name: "start go server"
-  service: name=go-server state=started
+  service: name=go-server state=restarted
   sudo: yes
