@@ -31,6 +31,10 @@
     shell: mkdir -p {{app_home_path}} && mkdir -p {{app_home_path}}/log && mkdir -p {{app_home_path}}/bin
     sudo: yes
 
+  - name: "create necessary app directories"
+    shell: mkdir -p /opt/fbeazt && mkdir -p /opt/fbeazt/log && mkdir -p /opt/fbeazt/bin
+    sudo: yes
+
   - name: "install mongodb"
     yum: name=mongodb state=present
     sudo: yes
@@ -53,6 +57,30 @@
 
   - name: "ensure supervisor is running"
     service: name=supervisord.service state=restarted enabled=yes
+    sudo: yes
+
+  - name: "install essentials"
+    yum: name={{item}} state=present
+    sudo: yes
+    with_items:
+      - gcc
+      - gcc-c++
+      - make
+      - openssl-devel
+      - pycrypto
+      - python34
+      - python34-devel
+      - pymongo
+      - setroubleshoot
+
+  - command: semodule -i nginx.pp
+    sudo: yes
+
+  - name: "install pip3"
+    shell: "type pip3>/dev/null 2>&1 || (curl https://bootstrap.pypa.io/get-pip.py | /usr/bin/python3.4)"
+    sudo: yes
+
+  - command: pip install virtualenv virtualenvwrapper
     sudo: yes
 
   handlers:

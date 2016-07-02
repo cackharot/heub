@@ -1,0 +1,23 @@
+---
+- file: src={{ item.src }} dest={{ item.dest }} state=link
+  with_items:
+    - { src: /etc/init.d/go-agent, dest: /etc/init.d/go-agent-1 }
+    - { src: /usr/share/go-agent, dest: /usr/share/go-agent-1 }
+  sudo: yes
+
+- name: stat go-agent-1
+  stat: path=/etc/default/go-agent-1
+  register: go1_stat
+
+- command: cp /etc/default/go-agent /etc/default/go-agent-1
+  sudo: yes
+  when: go1_stat.stat.exists == False
+
+- file: path={{ item }} state=directory owner=go group=go
+  sudo: yes
+  with_items:
+    - /var/lib/go-agent-1
+    - /var/log/go-agent-1
+
+- command: service go-agent-1 start
+  sudo: yes

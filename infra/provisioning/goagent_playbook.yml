@@ -5,3 +5,4 @@
   tasks:
   - include: tasks/common.yml
   - include: tasks/goagent.yml
+  - include: tasks/add-goagent.yml

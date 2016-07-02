@@ -13,7 +13,7 @@
 #   sudo: yes
 
 - name: "copy pipeline config"
-  copy: src=files/cruise-config.xml dest=/etc/go/cruise-config.xml
+  copy: src=files/cruise-config.xml dest=/etc/go/cruise-config.xml backup=yes
   sudo: yes
 
 # - file: path=/etc/go/cruise-config.xml state=touch owner=go group=go mode=0755

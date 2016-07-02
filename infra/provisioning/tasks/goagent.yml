@@ -17,6 +17,9 @@
   service: name=mongod state=started enabled=yes
   sudo: yes
 
+- file: path=/var/go owner=go group=go state=directory
+  sudo: yes
+
 - name: "install go-agent"
   yum: name=go-agent state=present
   sudo: yes
@@ -35,4 +38,23 @@
 
 - name: "install haskell stack"
   yum: name=stack state=present
+  sudo: yes
+
+- name: "install python 3.4"
+  yum: name=python34 state=present
+  sudo: yes
+
+- name: "install python 3.4 dev"
+  yum: name=python34-devel state=present
+  sudo: yes
+
+- name: "install pycrypto"
+  yum: name=pycrypto state=present
+  sudo: yes
+
+- name: "install pip3"
+  shell: "type pip3>/dev/null 2>&1 || (curl https://bootstrap.pypa.io/get-pip.py | /usr/bin/python3.4)"
+  sudo: yes
+
+- command: pip install virtualenv virtualenvwrapper
   sudo: yes

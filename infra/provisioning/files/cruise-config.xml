@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="77">
   <server artifactsdir="artifacts" purgeStart="1.0" purgeUpto="2.0" commandRepositoryLocation="default" serverId="" />
-  <pipelines group="Development">
+  <pipelines group="Haskell-heub">
     <pipeline name="Build">
       <environmentvariables>
         <variable name="STACK_ROOT">
@@ -24,6 +24,9 @@
                 <arg>--allow-different-user</arg>
               </exec>
             </tasks>
+            <resources>
+              <resource>heub</resource>
+            </resources>
           </job>
         </jobs>
       </stage>
@@ -44,6 +47,9 @@
                 <runif status="passed" />
               </exec>
             </tasks>
+            <resources>
+              <resource>heub</resource>
+            </resources>
             <artifacts>
               <artifact src="heub/.stack-work/install/x86_64-linux/lts-5.5/7.10.3/bin/heub" dest="heub" />
             </artifacts>
@@ -67,6 +73,9 @@
                 <runif status="passed" />
               </exec>
             </tasks>
+            <resources>
+              <resource>heub</resource>
+            </resources>
             <artifacts>
               <artifact src="heub/.stack-work/install/x86_64-linux/lts-5.5/7.10.3/bin/heub" />
             </artifacts>
@@ -102,13 +111,59 @@
                 <runif status="passed" />
               </exec>
             </tasks>
+            <resources>
+              <resource>heub</resource>
+            </resources>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+  </pipelines>
+  <pipelines group="Foodbeazt">
+    <pipeline name="fb-Build">
+      <materials>
+        <git url="https://github.com/cackharot/fbeazt.git" dest="fbeazt" />
+      </materials>
+      <stage name="build-n-test">
+        <jobs>
+          <job name="install-requirements">
+            <tasks>
+              <exec command="/bin/bash">
+                <arg>-c</arg>
+                <arg>/var/go/fb/bin/activate</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/var/go/fb/bin/pip" workingdir="fbeazt/src">
+                <arg>install</arg>
+                <arg>-r</arg>
+                <arg>foodbeazt/requirements.txt</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="/var/go/fb/bin/python3.4" workingdir="fbeazt/src">
+                <arg>setup.py</arg>
+                <arg>sdist</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+            <resources>
+              <resource>fbeazt</resource>
+            </resources>
           </job>
         </jobs>
       </stage>
     </pipeline>
   </pipelines>
   <agents>
-    <agent hostname="goagent.local" ipaddress="10.0.2.15" uuid="" />
+    <agent hostname="goagent.local" ipaddress="10.0.2.15" uuid="">
+      <resources>
+        <resource>heub</resource>
+      </resources>
+    </agent>
+    <agent hostname="goagent.local" ipaddress="10.0.2.15" uuid="">
+      <resources>
+        <resource>fbeazt</resource>
+      </resources>
+    </agent>
   </agents>
 </cruise>
 
